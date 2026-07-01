@@ -1,63 +1,140 @@
-<div align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://github.com/cumbucadev/design/raw/main/images/logo-dark-transparent.png"
-    >
-    <img
-      alt="Logo do Cumbuca Dev"
-      src="https://github.com/cumbucadev/design/raw/main/images/logo-light-transparent.png"
-      width="20%"
-    >
-  </picture>
-</div>
+# 🤖 Agente IA Editorial de Newsletter Técnica
 
-# <nome-do-repositório>
+Este projeto implementa um **Agente de Inteligência Artificial** completo e modular que coleta artigos em tempo real de várias fontes RSS, realiza de-duplicação inteligente, avalia a relevância técnica de cada um para pessoas desenvolvedoras utilizando o LLM local **Qwen (via Ollama)**, e redige uma newsletter técnica polida e de alto valor prático.
 
-[English Version](/README_EN.md)
+---
 
-## 💬 Novos Funcionalidades e Reportar Bugs
+## 📋 Requisitos e Arquitetura do Agente
 
-Caso queira sugerir novas funcionalidades ou reportar bugs, basta criar
-uma nova [issue][github-issues] e iremos lhe responder por lá!
+O agente foi construído seguindo rigorosamente os passos fundamentais de um pipeline de curadoria de conteúdo inteligente:
 
-(Para saber mais sobre github issues, confira a
-[documentação oficial do GitHub][github-issues-doc]).
+```mermaid
+graph TD
+    A[Fontes RSS] --> B[Coletor de Artigos]
+    B --> C[Passo 1: Remoção de Duplicatas]
+    C --> D[Passo 2: Análise Técnica via Ollama]
+    D --> E[Passo 3: Classificação & Filtro de Relevância]
+    E --> F[Passo 4: Ordenação & Seleção dos Top 5]
+    F --> G[Passo 5: Geração de Redação via Ollama]
+    G --> H[Arquivo newsletter.md]
+```
 
-## 💡 Dúvidas? Ideias?
+### Funcionalidades Implementadas:
+1. **Coleta de RSS Multi-fonte:** Coleta e normaliza informações estruturadas de 3 fontes padrão para desenvolvedores (*Hacker News*, *Dev.to*, *TechCrunch Developer*).
+2. **Deduplicação Inteligente:** Sanitiza os links (removendo queries tracking) e normaliza textualmente os títulos de forma a remover repetições e artigos equivalentes.
+3. **Agente Editorial IA (Classificador e Validador):** Cada artigo é enviado individualmente ao Ollama solicitando uma análise de categorização (`Notícia`, `Tutorial`, `Promoção`, `Outro`) e pontuação de relevância técnica (1 a 10) baseando-se no impacto de engenharia de software, retornando em JSON estrito.
+4. **Filtro de Relevância:** Descarta promoções, propagandas ordinárias e fofocas corporativas, focando estritamente em **notícias que sejam de relevância prática** para os desenvolvedores.
+5. **Ordenação e Top 5:** Os artigos filtrados são ordenados de forma decrescente pela relevância atribuída pela IA, e as 5 principais histórias são passadas para o redator.
+6. **Redator Criativo (Geração de Newsletter):** Um prompt refinado de redação orquestra o LLM local para assumir a persona de um Editor-Chefe, criando uma introdução sobre o ecossistema tecnológico, resumindo o conteúdo das 5 matérias, linkando para cada fonte original e fechando com um encerramento simpático e inteligente em português.
 
-Dúvidas de como utilizar a biblioteca? Novas ideias para o projeto? Quer compartilhar algo com a
-gente? Fique à vontade para criar um tópico no nosso [Discussions][github-discussions] que iremos
-interagir por lá!
+---
 
-(Para saber mais sobre github discussions, confira a
-[documentação oficial do GitHub][github-discussions-doc]).
+## 🚀 Como Executar o Agente
 
-## 💻 Contribuindo com o Código do Projeto
+Você pode rodar este agente de duas formas: usando o ambiente isolado com **Dev Containers** (opção recomendada e mais segura) ou diretamente no seu **ambiente Python local**.
 
-Sua colaboração é sempre muito bem-vinda! Para facilitar seus primeiros passos, preparamos os seguintes arquivos:
+### Opção A: Usando Dev Containers (Recomendado 🔒)
 
-- [CONTRIBUTING.md](/CONTRIBUTING.md): Aqui você encontrará todas as instruções necessárias para contribuir com o projeto.
-- [CONTRIBUTING_EN.md](/CONTRIBUTING_EN.md): Versão em inglês das diretrizes de contribuição.
-- [CODE_OF_CONDUCT.md](/CODE_OF_CONDUCT.md): Nosso código de conduta, que define as expectativas para interações respeitosas e inclusivas dentro da comunidade.
-- [CODE_OF_CONDUCT_EN.md](/CODE_OF_CONDUCT_EN.md): Versão em inglês do código de conduta.
-- [CORE_TEAM.md](/CORE_TEAM.md): Lista e apresenta informações sobre as pessoas integrantes do time principal do projeto, incluindo suas funções e formas de contato.
-- [CORE_TEAM_EN.md](CORE_TEAM_EN.md): Versão em inglês da lista e informações sobre o time principal do projeto.
-- [LICENSE.md](/LICENSE.md): Detalhes sobre a licença do projeto. Ela define o que você pode e não pode fazer com o código. Em geral, a licença permite que você use, modifique e distribua o código, desde que siga os termos definidos. No entanto, é importante verificar se há restrições específicas, como atribuição de crédito ao autor original ou proibição de uso comercial.
-- [VISION.md](/VISION.md): Explica o propósito, o público-alvo, a visão de futuro, os princípios e o contexto geral do projeto dentro da Cumbuca.
-- [VISION_EN.md](/VISION_EN.md): Versão em inglês do documento de visão do projeto.
+O projeto inclui uma pasta [.devcontainer](.devcontainer) estruturada para isolar o ambiente de desenvolvimento.
 
-Certifique-se de ler esses arquivos com atenção antes de contribuir. Se tiver qualquer dificuldade ou dúvida, não hesite em nos perguntar utilizando o [GitHub Discussions][github-discussions]. Toda ajuda conta!
+1. **Abra o projeto no VS Code**.
+2. Certifique-se de que a extensão **Dev Containers** (da Microsoft) esteja instalada.
+3. Quando solicitado pelo VS Code, clique em **"Reopen in Container"** (Reabrir no Container) ou use a Paleta de Comandos (`Ctrl+Shift+P` -> `Dev Containers: Reopen in Container`).
+4. O VS Code construirá a imagem e conectará você de forma totalmente isolada. Ele já vem configurado para:
+   - Apontar o tráfego do Ollama automaticamente de dentro do container para a sua máquina host (via `host.docker.internal`).
+   - Pré-instalar todas as bibliotecas do `requirements.txt`.
+5. No terminal integrado do devcontainer, basta rodar:
+   ```bash
+   python main.py
+   ```
 
-## ❤️ Quem já Contribuiu
+---
 
-<a href="https://github.com/cumbucadev/generic-template/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cumbucadev/generic-template" />
-</a></br></br>
+### Opção B: Usando o Ambiente Python Local
 
-_Made with [contrib.rocks](https://contrib.rocks)._
+### 1. Iniciar o Ollama Local
+Certifique-se de que o serviço do Ollama esteja ativo em seu sistema operacional. No terminal, você pode iniciar com:
+```bash
+ollama serve
+```
 
-[github-discussions-doc]: https://docs.github.com/pt/discussions
-[github-discussions]: https://github.com/cumbucadev/<nome-do-repositório>/discussions
-[github-issues-doc]: https://docs.github.com/pt/issues/tracking-your-work-with-issues/creating-an-issue
-[github-issues]: https://github.com/cumbucadev/<nome-do-repositório>/issues
+Com o serviço rodando, confirme que você possui o modelo local instalado. Nas suas configurações locais, nós identificamos que você já possui o modelo **`qwen3.5:4b`** instalado, o qual utilizaremos por padrão. Caso queira baixar ou testar outro modelo:
+```bash
+ollama pull qwen3.5:4b
+```
+
+### 2. Ativar o Ambiente Virtual
+O ambiente Python conda `copa` já está totalmente configurado e as seguintes dependências já foram instaladas com sucesso:
+- `feedparser` (leitor de feeds RSS)
+- `ollama` (SDK oficial do Ollama)
+- `pydantic` (validação e tipagem de dados)
+- `jinja2` (mecanismo de renderização de strings/templates)
+
+Para executar os scripts, use o comando Python do seu ambiente diretamente, eliminando qualquer risco de conflito global:
+```bash
+/home/teo/anaconda3/envs/copa/bin/python main.py
+```
+
+### 3. Argumentos Personalizáveis
+Você pode alterar o modelo local, o endereço de rede do Ollama ou o arquivo de destino utilizando os argumentos de linha de comando:
+```bash
+# Executa usando o modelo qwen3.5:9b (que também está disponível na sua máquina!)
+/home/teo/anaconda3/envs/copa/bin/python main.py --model qwen3.5:9b --output minha_newsletter.md
+```
+
+---
+
+## 📂 Estrutura dos Arquivos do Projeto
+
+- **[config.py](config.py):** Arquivo de configurações centrais do agente. Nele você pode alterar as fontes RSS padrão ou mudar o modelo padrão.
+- **[rss_parser.py](rss_parser.py):** Concentra a leitura do RSS pelo `feedparser` e implementa a rotina de de-duplicação que remove strings não alfanuméricas para evitar redundâncias que burlam comparadores simples de strings.
+- **[ollama_client.py](ollama_client.py):** Gerencia a interface de comunicação de baixo nível com o daemon do Ollama, forçando saídas em formato JSON para garantir a consistência das classificações feitas pela IA.
+- **[agent.py](agent.py):** Inteligência de classificação profunda. Define as regras de categorização e os limiares de relevância para desenvolvedores.
+- **[newsletter.py](newsletter.py):** Faz o papel do Editor-Chefe literário. Ele coleta os dados refinados pelo Agente e monta o corpo da Edição do dia no formato Markdown.
+- **[main.py](main.py):** Script orquestrador central executável por linha de comando.
+- **[requirements.txt](requirements.txt):** Dependências do projeto para replicação em outros ambientes.
+
+---
+
+## 📈 Exemplo Prático de Execução
+
+Ao rodar o comando, o terminal imprimirá um log detalhado de cada fase da curadoria:
+
+```text
+[15:10:02] INFO - === INICIANDO AGENTE DA NEWSLETTER ===
+[15:10:02] INFO - Modelo LLM configurado: 'qwen3.5:4b'
+
+--- PASSO 1: Coleta RSS ---
+[15:10:02] INFO - Coletando feed de: https://news.ycombinator.com/rss
+[15:10:03] INFO - Coletando feed de: https://dev.to/feed
+[15:10:04] INFO - Coletando feed de: https://techcrunch.com/category/developer/feed/
+
+--- PASSO 2: Remoção de Duplicadas ---
+[15:10:04] INFO - Coleta finalizada: 85 coletados, 78 únicos após deduplicação.
+
+--- PASSO 3: Inicializando IA local (Ollama) ---
+[15:10:04] INFO - OllamaClient inicializado com modelo: qwen3.5:4b no host: http://localhost:11434
+
+--- PASSO 4: Classificação, Filtragem e Ordenação pelo Agente Editorial IA ---
+[15:10:04] INFO - Processando artigo 1/78
+[15:10:06] INFO - Analisando artigo: 'Python 3.13.1 Released with Experimental Free-Threaded Build' via qwen3.5:4b
+...
+[15:11:32] INFO - Filtragem completa: 78 analisados -> 22 classificados como notícias relevantes.
+[15:11:32] INFO - Seleção final pronta com 5 artigos selecionados.
+
+=== DETALHES DOS 5 ARTIGOS SELECIONADOS PELO AGENTE ===
+[1] Python 3.13.1 Released with Experimental Free-Threaded Build
+    Fonte: Hacker News | Categoria: Notícia | Relevância: 10/10
+    Link: https://news.ycombinator.com/item?id=...
+    Justificativa Editorial: Modificação fundamental no interpretador removendo o GIL. Extremamente impactante para desenvolvimento concorrente em Python.
+...
+
+--- PASSO 5: Redigindo Newsletter Final via IA ---
+[15:11:32] INFO - Gerando texto da newsletter...
+
+--- PASSO 6: Gravando Newsletter em Arquivo ---
+[15:11:55] INFO - Newsletter salva com sucesso em 'newsletter.md'!
+[15:11:55] INFO - === AGENTE EXECUTADO COM SUCESSO! ===
+```
+
+Fique à vontade para inspecionar e usufruir de sua nova newsletter autogerada de alta qualidade técnica! 🚀
