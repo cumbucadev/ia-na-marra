@@ -1,6 +1,6 @@
 # 🤖 Agente IA Editorial de Newsletter Técnica
 
-Este projeto implementa um **Agente de Inteligência Artificial** completo e modular que coleta artigos em tempo real de várias fontes RSS, realiza de-duplicação inteligente, avalia a relevância técnica de cada um para pessoas desenvolvedoras utilizando o LLM local **Qwen (via Ollama)**, e redige uma newsletter técnica polida e de alto valor prático.
+Este projeto implementa um **Agente de Inteligência Artificial** completo e modular que coleta artigos em tempo real de várias fontes RSS, realiza de-duplicação inteligente, avalia a relevância técnica de cada um para pessoas desenvolvedoras utilizando o LLM local **Qwen3-8B (via KoboldCpp / OpenAI API)**, e redige uma newsletter técnica polida e de alto valor prático.
 
 ---
 
@@ -12,41 +12,45 @@ O agente foi construído seguindo rigorosamente os passos fundamentais de um pip
 graph TD
     A[Fontes RSS] --> B[Coletor de Artigos]
     B --> C[Passo 1: Remoção de Duplicatas]
-    C --> D[Passo 2: Análise Técnica via Ollama]
+    C --> D[Passo 2: Análise Técnica via KoboldCpp]
     D --> E[Passo 3: Classificação & Filtro de Relevância]
     E --> F[Passo 4: Ordenação & Seleção dos Top 5]
-    F --> G[Passo 5: Geração de Redação via Ollama]
+    F --> G[Passo 5: Geração de Redação via KoboldCpp]
     G --> H[Arquivo newsletter.md]
 ```
 
 ### Funcionalidades Implementadas:
 1. **Coleta de RSS Multi-fonte:** Coleta e normaliza informações estruturadas de 3 fontes padrão para desenvolvedores (*Hacker News*, *Dev.to*, *TechCrunch Developer*).
 2. **Deduplicação Inteligente:** Sanitiza os links (removendo queries tracking) e normaliza textualmente os títulos de forma a remover repetições e artigos equivalentes.
-3. **Agente Editorial IA (Classificador e Validador):** Cada artigo é enviado individualmente ao Ollama solicitando uma análise de categorização (`Notícia`, `Tutorial`, `Promoção`, `Outro`) e pontuação de relevância técnica (1 a 10) baseando-se no impacto de engenharia de software, retornando em JSON estrito.
+3. **Agente Editorial IA (Classificador e Validador):** Cada artigo é enviado individualmente ao KoboldCpp através da API OpenAI solicitando uma análise de categorização (`Notícia`, `Tutorial`, `Promoção`, `Outro`) e pontuação de relevância técnica (1 a 10) baseando-se no impacto de engenharia de software, retornando em JSON estrito.
 4. **Filtro de Relevância:** Descarta promoções, propagandas ordinárias e fofocas corporativas, focando estritamente em **notícias que sejam de relevância prática** para os desenvolvedores.
 5. **Ordenação e Top 5:** Os artigos filtrados são ordenados de forma decrescente pela relevância atribuída pela IA, e as 5 principais histórias são passadas para o redator.
 6. **Redator Criativo (Geração de Newsletter):** Um prompt refinado de redação orquestra o LLM local para assumir a persona de um Editor-Chefe, criando uma introdução sobre o ecossistema tecnológico, resumindo o conteúdo das 5 matérias, linkando para cada fonte original e fechando com um encerramento simpático e inteligente em português.
 
 ---
 
-## 🚀 Como Executar o Agente
+## 🚀 Como Executar o Agente em Dev Containers (Recomendado 🔒)
 
-Você pode rodar este agente de duas formas: usando o ambiente isolado com **Dev Containers** (opção recomendada e mais segura) ou diretamente no seu **ambiente Python local**.
+O projeto inclui um o ambiente multi-container usando **Docker Compose** e **Dev Containers** (da Microsoft) totalmente configurado com:
+- O container da aplicação (`app`), onde o código Python roda de forma isolada.
+- O container do model server (`koboldcpp`), que roda focado em CPU e gerencia o carregamento de forma inteligente.
 
-### Opção A: Usando Dev Containers (Recomendado 🔒)
+### Passo 1: Colocar o modelo localmente
+Coloque o seu arquivo de modelo local no formato GGUF dentro da pasta `models/` nomeado exatamente como `Qwen3-8B.gguf`:
+`./models/Qwen3-8B.gguf`
 
-O projeto inclui uma pasta [.devcontainer](.devcontainer) estruturada para isolar o ambiente de desenvolvimento.
-
+### Passo 2: Reabrir no Container
 1. **Abra o projeto no VS Code**.
 2. Certifique-se de que a extensão **Dev Containers** (da Microsoft) esteja instalada.
 3. Quando solicitado pelo VS Code, clique em **"Reopen in Container"** (Reabrir no Container) ou use a Paleta de Comandos (`Ctrl+Shift+P` -> `Dev Containers: Reopen in Container`).
-4. O VS Code construirá a imagem e conectará você de forma totalmente isolada. Ele já vem configurado para:
-   - Apontar o tráfego do Ollama automaticamente de dentro do container para a sua máquina host (via `host.docker.internal`).
-   - Pré-instalar todas as bibliotecas do `requirements.txt`.
-5. No terminal integrado do devcontainer, basta rodar:
-   ```bash
-   python main.py
-   ```
+4. O VS Code construirá o ambiente de desenvolvimento e conectará você no container da aplicação de forma totalmente isolada. 
+5. O container do `koboldcpp` aguardará o modelo de forma inteligente e servirá a API na porta `5001`.
+
+### Passo 3: Rodar o Agente
+No terminal integrado do devcontainer, basta rodar:
+```bash
+python main.py
+```
 
 ---
 

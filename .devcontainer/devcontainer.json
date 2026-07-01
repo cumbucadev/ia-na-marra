@@ -1,19 +1,14 @@
 {
   "name": "Agente Newsletter (Isolado)",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  
-  // Garante que o container consiga se comunicar com o Ollama hospedado no Host (Linux)
-  "runArgs": [
-    "--add-host=host.docker.internal:host-gateway"
-  ],
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
 
-  // Configurações de ambiente no container (definido como localhost para usar o Ollama dentro do container)
+  // Configurações de ambiente no container para acessar o serviço do Koboldcpp
   "containerEnv": {
-    "OLLAMA_HOST": "http://localhost:11434",
-    "OLLAMA_MODEL": "qwen2.5:3b"
+    "OPENAI_API_BASE": "http://koboldcpp:5001/v1",
+    "OPENAI_API_KEY": "any-string-for-kobold",
+    "OPENAI_MODEL": "Qwen3-8B"
   },
 
   // Customizações para o VS Code no container

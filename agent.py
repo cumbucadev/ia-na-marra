@@ -1,13 +1,13 @@
 import logging
 from typing import List, Dict, Any
-from ollama_client import OllamaClient
+from openai_client import OpenAIClient
 from config import CLASSIFICATIONS
 
 logger = logging.getLogger(__name__)
 
 class NewsletterAgent:
-    def __init__(self, ollama_client: OllamaClient):
-        self.ai = ollama_client
+    def __init__(self, openai_client: OpenAIClient):
+        self.ai = openai_client
 
     def self_analyze_article(self, article: Dict[str, Any]) -> Dict[str, Any]:
         """Usa o Ollama para classificar e pontuar a relevância de um artigo individual."""
@@ -42,6 +42,10 @@ ESTRUTURA DE RETORNO (JSON):
         
         logger.info(f"Analisando artigo: '{article['title']}' via {self.ai.model}")
         result = self.ai.generate_json_response(prompt, system_prompt=system_prompt)
+        
+        # Se vier como uma lista, desembrulha o primeiro elemento
+        if isinstance(result, list) and len(result) > 0:
+            result = result[0]
         
         # Fallback caso dê erro de parsing ou timeout
         if not result or not isinstance(result, dict):
@@ -81,6 +85,8 @@ ESTRUTURA DE RETORNO (JSON):
             # Mescla as informações
             enriched_article = {**article, **analysis}
             processed_articles.append(enriched_article)
+
+        self.processed_articles = processed_articles
 
         # Filtragem: apenas notícias relevantes
         # Requisito: "Filtrar apenas notícias relevantes para desenvolvedores"

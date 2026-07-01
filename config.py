@@ -1,8 +1,11 @@
 import os
 
-# Configurações do Agente de Newsletter
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+# Configurações do Agente de Newsletter (OpenAI / KoboldCpp)
+# Dentro do ambiente do devcontainer com docker-compose, o host "koboldcpp" é usado
+# para comunicação inter-container, e a porta padrão é a 5001.
+OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "http://koboldcpp:5001/v1")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "any-string-for-kobold")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "Qwen3-8B")
 
 # Fontes de RSS padrão
 DEFAULT_FEEDS = [

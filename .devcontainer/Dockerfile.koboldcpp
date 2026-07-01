@@ -1,0 +1,23 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Baixa o binário pré-compilado do KoboldCpp
+RUN curl -LO https://github.com/LostRuins/koboldcpp/releases/latest/download/koboldcpp-linux-x64 \
+    && mv koboldcpp-linux-x64 /usr/local/bin/koboldcpp \
+    && chmod +x /usr/local/bin/koboldcpp
+
+RUN mkdir -p /models && chmod 777 /models
+
+COPY koboldcpp_start.sh /usr/local/bin/koboldcpp_start.sh
+RUN chmod +x /usr/local/bin/koboldcpp_start.sh
+
+EXPOSE 5001
+
+ENTRYPOINT [ "/usr/local/bin/koboldcpp_start.sh" ]

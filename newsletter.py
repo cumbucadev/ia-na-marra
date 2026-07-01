@@ -1,13 +1,13 @@
 import logging
 from typing import List, Dict, Any
 from datetime import datetime
-from ollama_client import OllamaClient
+from openai_client import OpenAIClient
 
 logger = logging.getLogger(__name__)
 
 class NewsletterGenerator:
-    def __init__(self, ollama_client: OllamaClient):
-        self.ai = ollama_client
+    def __init__(self, openai_client: OpenAIClient):
+        self.ai = openai_client
 
     def generate_content(self, articles: List[Dict[str, Any]]) -> str:
         """Instrui o Ollama a redigir o corpo e editorial da newsletter com base nos artigos selecionados."""
