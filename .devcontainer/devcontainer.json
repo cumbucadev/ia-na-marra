@@ -1,0 +1,41 @@
+{
+  "name": "Agente Newsletter (Isolado)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  
+  // Garante que o container consiga se comunicar com o Ollama hospedado no Host (Linux)
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+
+  // Configurações de ambiente no container (definido como localhost para usar o Ollama dentro do container)
+  "containerEnv": {
+    "OLLAMA_HOST": "http://localhost:11434",
+    "OLLAMA_MODEL": "qwen2.5:3b"
+  },
+
+  // Customizações para o VS Code no container
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.extraPaths": [
+          "/workspace"
+        ]
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+
+  // Comando executado logo após a criação do container
+  "postCreateCommand": "pip3 install --user -r requirements.txt",
+
+  // Rodar como usuário não-root por segurança
+  "remoteUser": "vscode"
+}
